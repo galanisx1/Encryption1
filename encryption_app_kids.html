@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Encriptación Secreta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .menu-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 15px;
+            padding: 30px 20px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-btn:nth-child(1) { background: linear-gradient(45deg, #ff6b6b, #ee5a24); }
+        .menu-btn:nth-child(2) { background: linear-gradient(45deg, #54a0ff, #2e86de); }
+        .menu-btn:nth-child(3) { background: linear-gradient(45deg, #5f27cd, #341f97); }
+        .menu-btn:nth-child(4) { background: linear-gradient(45deg, #00d2d3, #01a3a4); }
+        .menu-btn:nth-child(5) { background: linear-gradient(45deg, #feca57, #ff9ff3); }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #26de81, #20bf6b);
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .result-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 60px;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+        }
+
+        .binary-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+        }
+
+        .frequency-chart {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+            gap: 5px;
+            margin: 20px 0;
+        }
+
+        .freq-bar {
+            background: rgba(255, 255, 255, 0.7);
+            color: #333;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 2px;
+            font-size: 0.8em;
+            min-height: 30px;
+        }
+
+        .enigma-rotor {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .enigma-rotor:hover {
+            transform: rotate(15deg);
+        }
+
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #26de81;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla Principal -->
+        <div id="mainScreen" class="screen active">
+            <h1 class="title">🕵️ Centro de Encriptación Secreta 🕵️</h1>
+            <p style="text-align: center; font-size: 1.2em; margin-bottom: 30px;">
+                ¡Bienvenido, joven criptoanalista! Elige tu misión secreta:
+            </p>
+            
+            <div class="menu-grid">
+                <button class="menu-btn" onclick="showScreen('caesar')">
+                    🏛️ Cifrado César Avanzado
+                    <br><small>Descifra como los romanos</small>
+                </button>
+                
+                <button class="menu-btn" onclick="showScreen('keyGenerator')">
+                    🔑 Generador de Claves Secretas
+                    <br><small>Matemáticas encriptadas</small>
+                </button>
+                
+                <button class="menu-btn" onclick="showScreen('substitution')">
+                    🔤 Cifrado por Sustitución
+                    <br><small>Usa palabras clave secretas</small>
+                </button>
+                
+                <button class="menu-btn" onclick="showScreen('binary')">
+                    💻 Encriptador Binario
+                    <br><small>El lenguaje de las máquinas</small>
+                </button>
+                
+                <button class="menu-btn" onclick="showScreen('enigma')">
+                    ⚙️ Máquina Enigma Simple
+                    <br><small>Como en la Segunda Guerra Mundial</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cifrado César -->
+        <div id="caesar" class="screen">
+            <button class="back-btn" onclick="showScreen('mainScreen')">← Volver al menú</button>
+            <h2 class="title">🏛️ Cifrado César Avanzado</h2>
+            
+            <div class="explanation">
+                <strong>¿Cómo funciona?</strong> Cada letra del alfabeto se mueve un número fijo de posiciones. 
+                Por ejemplo, con desplazamiento 3: A→D, B→E, C→F...
+            </div>
+
+            <div class="input-group">
+                <label>Desplazamiento (1-25):</label>
+                <input type="range" class="slider" id="caesarShift" min="1" max="25" value="3" oninput="updateShiftDisplay()">
+                <span id="shiftDisplay">3</span>
+            </div>
+
+            <div class="input-group">
+                <label>Tu mensaje:</label>
+                <textarea id="caesarInput" rows="4" placeholder="Para ENCRIPTAR: escribe texto normal. Para DESENCRIPTAR: escribe texto cifrado"></textarea>
+            </div>
+
+            <button class="action-btn" onclick="caesarEncrypt()">🔒 Encriptar (texto → código)</button>
+            <button class="action-btn" onclick="caesarDecrypt()">🔓 Desencriptar (código → texto)</button>
+            <button class="action-btn" onclick="showFrequencyAnalysis()">📊 Análisis de Frecuencia</button>
+
+            <div class="result-box" id="caesarResult">El resultado aparecerá aquí...</div>
+            
+            <div id="frequencyChart" class="frequency-chart" style="display: none;"></div>
+        </div>
+
+        <!-- Generador de Claves -->
+        <div id="keyGenerator" class="screen">
+            <button class="back-btn" onclick="showScreen('mainScreen')">← Volver al menú</button>
+            <h2 class="title">🔑 Generador de Claves Secretas</h2>
+            
+            <div class="explanation">
+                <strong>¿Cómo funciona?</strong> Usa operaciones matemáticas para transformar cada letra. 
+                Puedes sumar, multiplicar o usar patrones especiales.
+            </div>
+
+            <div class="input-group">
+                <label>Tipo de operación:</label>
+                <select id="operationType" style="width: 100%; padding: 15px; border-radius: 10px; border: none; font-size: 1em;">
+                    <option value="add">Sumar número</option>
+                    <option value="multiply">Multiplicar y sumar</option>
+                    <option value="pattern">Patrón fibonacci</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Número clave:</label>
+                <input type="number" id="keyNumber" value="5" min="1" max="25">
+            </div>
+
+            <div class="input-group">
+                <label>Tu mensaje:</label>
+                <textarea id="keyInput" rows="4" placeholder="Escribe tu mensaje..."></textarea>
+            </div>
+
+            <button class="action-btn" onclick="keyEncrypt()">🔒 Encriptar</button>
+            <button class="action-btn" onclick="keyDecrypt()">🔓 Desencriptar</button>
+            <button class="action-btn" onclick="generateRandomKey()">🎲 Clave Aleatoria</button>
+
+            <div class="result-box" id="keyResult">El resultado aparecerá aquí...</div>
+        </div>
+
+        <!-- Cifrado por Sustitución -->
+        <div id="substitution" class="screen">
+            <button class="back-btn" onclick="showScreen('mainScreen')">← Volver al menú</button>
+            <h2 class="title">🔤 Cifrado por Sustitución</h2>
+            
+            <div class="explanation">
+                <strong>¿Cómo funciona?</strong> Usa una palabra clave para crear un nuevo alfabeto mezclado.
+                ¡Sin letras repetidas!
+            </div>
+
+            <div class="input-group">
+                <label>Palabra clave (sin letras repetidas):</label>
+                <input type="text" id="substitutionKey" placeholder="CLAVE" oninput="generateSubstitutionAlphabet()">
+            </div>
+
+            <div class="input-group">
+                <label>Alfabeto normal:</label>
+                <div id="normalAlphabet" style="font-family: monospace; font-size: 1.2em; letter-spacing: 3px;">
+                    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Alfabeto secreto:</label>
+                <div id="secretAlphabet" style="font-family: monospace; font-size: 1.2em; letter-spacing: 3px; color: #26de81;">
+                    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Tu mensaje:</label>
+                <textarea id="substitutionInput" rows="4" placeholder="Escribe tu mensaje..."></textarea>
+            </div>
+
+            <button class="action-btn" onclick="substitutionEncrypt()">🔒 Encriptar</button>
+            <button class="action-btn" onclick="substitutionDecrypt()">🔓 Desencriptar</button>
+
+            <div class="result-box" id="substitutionResult">El resultado aparecerá aquí...</div>
+        </div>
+
+        <!-- Encriptador Binario -->
+        <div id="binary" class="screen">
+            <button class="back-btn" onclick="showScreen('mainScreen')">← Volver al menú</button>
+            <h2 class="title">💻 Encriptador Binario</h2>
+            
+            <div class="explanation">
+                <strong>¿Cómo funciona?</strong> Las computadoras solo entienden 0s y 1s. 
+                Cada letra tiene su código binario único de 8 dígitos.
+            </div>
+
+            <div class="input-group">
+                <label>Tu mensaje:</label>
+                <input type="text" id="binaryInput" placeholder="Hola mundo">
+            </div>
+
+            <button class="action-btn" onclick="textToBinary()">➡️ Texto a Binario</button>
+            <button class="action-btn" onclick="binaryToText()">⬅️ Binario a Texto</button>
+            <button class="action-btn" onclick="showBinaryTable()">📋 Tabla ASCII</button>
+
+            <div class="result-box binary-display" id="binaryResult">El resultado aparecerá aquí...</div>
+            
+            <div id="asciiTable" style="display: none; background: rgba(255,255,255,0.9); color: #333; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                <h3>Tabla ASCII Básica:</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-family: monospace;">
+                    <div>A = 01000001</div><div>B = 01000010</div><div>C = 01000011</div><div>D = 01000100</div>
+                    <div>E = 01000101</div><div>F = 01000110</div><div>G = 01000111</div><div>H = 01001000</div>
+                    <div>I = 01001001</div><div>J = 01001010</div><div>K = 01001011</div><div>L = 01001100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Máquina Enigma -->
+        <div id="enigma" class="screen">
+            <button class="back-btn" onclick="showScreen('mainScreen')">← Volver al menú</button>
+            <h2 class="title">⚙️ Máquina Enigma Simplificada</h2>
+            
+            <div class="explanation">
+                <strong>¿Cómo funciona?</strong> Los rotores giran cada vez que escribes una letra,
+                cambiando el cifrado constantemente. ¡Haz clic en los rotores para configurarlos!
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <div class="enigma-rotor" id="rotor1" onclick="rotateRotor(1)">A</div>
+                <div class="enigma-rotor" id="rotor2" onclick="rotateRotor(2)">B</div>
+                <div class="enigma-rotor" id="rotor3" onclick="rotateRotor(3)">C</div>
+            </div>
+
+            <div class="input-group">
+                <label>Tu mensaje (una letra a la vez):</label>
+                <input type="text" id="enigmaInput" placeholder="Escribe aquí..." maxlength="1" oninput="enigmaProcess()">
+            </div>
+
+            <button class="action-btn" onclick="resetEnigma()">🔄 Reiniciar Rotores</button>
+            <button class="action-btn" onclick="enigmaDemo()">🎯 Demostración</button>
+
+            <div class="result-box" id="enigmaResult">Escribe una letra para ver la magia...</div>
+            
+            <div id="enigmaHistory" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <strong>Historial de cifrado:</strong>
+                <div id="historyContent">Aquí verás cada transformación...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let rotorPositions = [0, 1, 2];
+        let enigmaHistory = [];
+        let substitutionAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        // Función para cambiar entre pantallas
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // CIFRADO CÉSAR
+        function updateShiftDisplay() {
+            const shift = document.getElementById('caesarShift').value;
+            document.getElementById('shiftDisplay').textContent = shift;
+        }
+
+        function caesarEncrypt() {
+            const text = document.getElementById('caesarInput').value.toUpperCase();
+            const shift = parseInt(document.getElementById('caesarShift').value);
+            let result = '';
+
+            for (let char of text) {
+                if (char.match(/[A-Z]/)) {
+                    result += String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+                } else {
+                    result += char;
+                }
+            }
+
+            document.getElementById('caesarResult').innerHTML = '🔒 <strong>Mensaje encriptado:</strong> ' + result + 
+                '<br><small>💡 Para desencriptar: copia este resultado, pégalo arriba y presiona "Desencriptar"</small>';
+        }
+
+        function caesarDecrypt() {
+            const text = document.getElementById('caesarInput').value.toUpperCase();
+            const shift = parseInt(document.getElementById('caesarShift').value);
+            let result = '';
+
+            for (let char of text) {
+                if (char.match(/[A-Z]/)) {
+                    result += String.fromCharCode((char.charCodeAt(0) - 65 - shift + 26) % 26 + 65);
+                } else {
+                    result += char;
+                }
+            }
+
+            document.getElementById('caesarResult').innerHTML = '🔓 <strong>Mensaje desencriptado:</strong> ' + result;
+        }
+
+        function showFrequencyAnalysis() {
+            const text = document.getElementById('caesarInput').value.toUpperCase();
+            const frequency = {};
+            
+            for (let char of text) {
+                if (char.match(/[A-Z]/)) {
+                    frequency[char] = (frequency[char] || 0) + 1;
+                }
+            }
+
+            const chart = document.getElementById('frequencyChart');
+            chart.innerHTML = '';
+            chart.style.display = 'grid';
+
+            for (let i = 65; i <= 90; i++) {
+                const char = String.fromCharCode(i);
+                const count = frequency[char] || 0;
+                const bar = document.createElement('div');
+                bar.className = 'freq-bar';
+                bar.textContent = char + '\n' + count;
+                bar.style.height = Math.max(30, count * 10) + 'px';
+                chart.appendChild(bar);
+            }
+        }
+
+        // GENERADOR DE CLAVES
+        function keyEncrypt() {
+            const text = document.getElementById('keyInput').value.toUpperCase();
+            const operation = document.getElementById('operationType').value;
+            const key = parseInt(document.getElementById('keyNumber').value);
+            let result = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char.match(/[A-Z]/)) {
+                    let shift;
+                    switch (operation) {
+                        case 'add':
+                            shift = key;
+                            break;
+                        case 'multiply':
+                            shift = (i + 1) * key;
+                            break;
+                        case 'pattern':
+                            shift = fibonacci(i + 1) % 26;
+                            break;
+                    }
+                    result += String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+                } else {
+                    result += char;
+                }
+            }
+
+            document.getElementById('keyResult').textContent = '🔒 Mensaje encriptado: ' + result;
+        }
+
+        function keyDecrypt() {
+            const text = document.getElementById('keyInput').value.toUpperCase();
+            const operation = document.getElementById('operationType').value;
+            const key = parseInt(document.getElementById('keyNumber').value);
+            let result = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char.match(/[A-Z]/)) {
+                    let shift;
+                    switch (operation) {
+                        case 'add':
+                            shift = key;
+                            break;
+                        case 'multiply':
+                            shift = (i + 1) * key;
+                            break;
+                        case 'pattern':
+                            shift = fibonacci(i + 1) % 26;
+                            break;
+                    }
+                    result += String.fromCharCode((char.charCodeAt(0) - 65 - shift + 26) % 26 + 65);
+                } else {
+                    result += char;
+                }
+            }
+
+            document.getElementById('keyResult').textContent = '🔓 Mensaje desencriptado: ' + result;
+        }
+
+        function generateRandomKey() {
+            const randomKey = Math.floor(Math.random() * 25) + 1;
+            document.getElementById('keyNumber').value = randomKey;
+            document.getElementById('keyResult').textContent = '🎲 Nueva clave generada: ' + randomKey;
+        }
+
+        function fibonacci(n) {
+            if (n <= 2) return 1;
+            let a = 1, b = 1;
+            for (let i = 3; i <= n; i++) {
+                [a, b] = [b, a + b];
+            }
+            return b;
+        }
+
+        // CIFRADO POR SUSTITUCIÓN
+        function generateSubstitutionAlphabet() {
+            const key = document.getElementById('substitutionKey').value.toUpperCase();
+            const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            // Crear alfabeto sin letras repetidas
+            let secret = '';
+            let used = new Set();
+            
+            // Primero agregar las letras de la clave
+            for (let char of key) {
+                if (char.match(/[A-Z]/) && !used.has(char)) {
+                    secret += char;
+                    used.add(char);
+                }
+            }
+            
+            // Luego agregar las letras restantes
+            for (let char of normal) {
+                if (!used.has(char)) {
+                    secret += char;
+                }
+            }
+            
+            substitutionAlphabet = secret;
+            document.getElementById('secretAlphabet').textContent = secret;
+        }
+
+        function substitutionEncrypt() {
+            const text = document.getElementById('substitutionInput').value.toUpperCase();
+            const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+
+            for (let char of text) {
+                if (char.match(/[A-Z]/)) {
+                    const index = normal.indexOf(char);
+                    result += substitutionAlphabet[index];
+                } else {
+                    result += char;
+                }
+            }
+
+            document.getElementById('substitutionResult').textContent = '🔒 Mensaje encriptado: ' + result;
+        }
+
+        function substitutionDecrypt() {
+            const text = document.getElementById('substitutionInput').value.toUpperCase();
+            const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+
+            for (let char of text) {
+                if (char.match(/[A-Z]/)) {
+                    const index = substitutionAlphabet.indexOf(char);
+                    result += normal[index];
+                } else {
+                    result += char;
+                }
+            }
+
+            document.getElementById('substitutionResult').textContent = '🔓 Mensaje desencriptado: ' + result;
+        }
+
+        // ENCRIPTADOR BINARIO
+        function textToBinary() {
+            const text = document.getElementById('binaryInput').value;
+            let binary = '';
+
+            for (let char of text) {
+                binary += char.charCodeAt(0).toString(2).padStart(8, '0') + ' ';
+            }
+
+            document.getElementById('binaryResult').textContent = binary.trim();
+        }
+
+        function binaryToText() {
+            const binary = document.getElementById('binaryInput').value;
+            const binaryArray = binary.split(' ');
+            let text = '';
+
+            for (let bin of binaryArray) {
+                if (bin.match(/^[01]{8}$/)) {
+                    text += String.fromCharCode(parseInt(bin, 2));
+                }
+            }
+
+            document.getElementById('binaryResult').textContent = text || 'Error: Formato binario incorrecto';
+        }
+
+        function showBinaryTable() {
+            const table = document.getElementById('asciiTable');
+            table.style.display = table.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // MÁQUINA ENIGMA
+        function rotateRotor(rotorNum) {
+            rotorPositions[rotorNum - 1] = (rotorPositions[rotorNum - 1] + 1) % 26;
+            const rotor = document.getElementById(`rotor${rotorNum}`);
+            rotor.textContent = String.fromCharCode(65 + rotorPositions[rotorNum - 1]);
+            rotor.style.transform = `rotate(${rotorPositions[rotorNum - 1] * 13.8}deg)`;
+        }
+
+        function enigmaProcess() {
+            const input = document.getElementById('enigmaInput').value.toUpperCase();
+            if (!input.match(/[A-Z]/)) return;
+
+            // Procesar la letra a través de los rotores ANTES de rotar
+            let char = input;
+            let charCode = char.charCodeAt(0) - 65;
+            
+            // Guardar el proceso paso a paso
+            let step1 = charCode;
+            let step2, step3, finalResult;
+            
+            // Aplicar transformaciones de cada rotor
+            step2 = (charCode + rotorPositions[0]) % 26;
+            step3 = (step2 + rotorPositions[1]) % 26;
+            finalResult = (step3 + rotorPositions[2]) % 26;
+            
+            const result = String.fromCharCode(finalResult + 65);
+            
+            // Mostrar resultado detallado
+            const rotor1Letter = String.fromCharCode(65 + rotorPositions[0]);
+            const rotor2Letter = String.fromCharCode(65 + rotorPositions[1]);
+            const rotor3Letter = String.fromCharCode(65 + rotorPositions[2]);
+            
+            document.getElementById('enigmaResult').innerHTML = 
+                `📧 <strong>${input}</strong> → Rotor1(${rotor1Letter}) → Rotor2(${rotor2Letter}) → Rotor3(${rotor3Letter}) → <strong style="color: #26de81;">${result}</strong>`;
+            
+            // DESPUÉS rotar el primer rotor
+            rotateRotor(1);
+            
+            // Agregar al historial
+            enigmaHistory.push(`${input} → ${result}`);
+            updateEnigmaHistory();
+            
+            // Limpiar input
+            document.getElementById('enigmaInput').value = '';
+        }
+
+        function updateEnigmaHistory() {
+            const content = document.getElementById('historyContent');
+            content.innerHTML = enigmaHistory.slice(-10).join('<br>') || 'Aquí verás cada transformación...';
+        }
+
+        function resetEnigma() {
+            rotorPositions = [0, 1, 2];
+            document.getElementById('rotor1').textContent = 'A';
+            document.getElementById('rotor2').textContent = 'B';
+            document.getElementById('rotor3').textContent = 'C';
+            document.querySelectorAll('.enigma-rotor').forEach(rotor => {
+                rotor.style.transform = 'rotate(0deg)';
+            });
+            enigmaHistory = [];
+            updateEnigmaHistory();
+            document.getElementById('enigmaResult').textContent = 'Rotores reiniciados. Escribe una letra para comenzar...';
+        }
+
+        function enigmaDemo() {
+            const demo = ['H', 'O', 'L', 'A'];
+            let i = 0;
+            
+            const interval = setInterval(() => {
+                if (i < demo.length) {
+                    document.getElementById('enigmaInput').value = demo[i];
+                    enigmaProcess();
+                    i++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        // Inicializar la app
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSubstitutionAlphabet();
+        });
+    </script>
+</body>
+</html>
